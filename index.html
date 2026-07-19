@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Positionsgrößen-Rechner · XAUUSD</title>
+<style>
+  :root{
+    --bg:#0a0c0a;
+    --panel:#0e130e;
+    --line:rgba(233,230,221,.10);
+    --line-soft:rgba(233,230,221,.06);
+    --cream:#e9e6dd;
+    --muted:#8a887f;
+    --green:#a9c3a2;
+    --green-strong:#c4dbbc;
+    --mono-green:#84a884;
+    --red:#c96a5a;
+    --amber:#c9a35a;
+    --serif:Georgia,'Times New Roman',serif;
+    --mono:ui-monospace,'SF Mono','Cascadia Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{
+    background:var(--bg);color:var(--cream);font-family:var(--sans);
+    min-height:100vh;padding:48px 24px 80px;
+    background-image:linear-gradient(rgba(233,230,221,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(233,230,221,.025) 1px,transparent 1px);
+    background-size:80px 80px;
+  }
+  .noscript-warn{
+    max-width:1060px;margin:0 auto 28px;border:1px solid rgba(201,163,90,.45);border-radius:6px;
+    padding:16px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--amber);
+    background:rgba(201,163,90,.07);
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+
+  .head-row{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,5vw,52px);letter-spacing:.01em;line-height:1.1}
+  .sub{font-family:var(--mono);color:var(--mono-green);font-size:12px;letter-spacing:.22em;text-transform:uppercase;margin-top:14px}
+
+  .langs{display:flex;gap:8px;margin-top:10px}
+  .langs button{
+    background:transparent;border:1px solid transparent;border-radius:5px;padding:5px 7px;cursor:pointer;
+    opacity:.4;transition:all .15s;line-height:0;
+  }
+  .langs button svg{width:24px;height:15px;border-radius:2px;display:block}
+  .langs button:hover{opacity:.8}
+  .langs button.on{opacity:1;border-color:rgba(169,195,162,.45);background:rgba(169,195,162,.08)}
+
+  .formula{
+    margin-top:36px;border:1px solid rgba(169,195,162,.22);background:linear-gradient(135deg,#0d130d,#0b100c);
+    border-radius:6px;padding:28px 32px;display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap;
+    font-family:var(--serif);font-size:clamp(16px,2.4vw,22px);
+  }
+  .formula .lhs{color:var(--green)}
+  .formula .frac{display:inline-flex;flex-direction:column;align-items:center;gap:6px}
+  .formula .frac .top{padding:0 10px 8px;border-bottom:1px solid rgba(233,230,221,.4)}
+  .formula .frac .bot{padding-top:2px}
+  .formula .eq{color:var(--muted)}
+  .formula .note{flex-basis:100%;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+
+  /* Hilfe-Sektion */
+  details.help{background:var(--panel);border:1px solid var(--line);border-radius:6px;margin-top:28px}
+  details.help summary{
+    display:flex;align-items:center;gap:16px;padding:16px 24px;cursor:pointer;list-style:none;
+    -webkit-user-select:none;user-select:none;
+  }
+  details.help summary::-webkit-details-marker{display:none}
+  details.help summary .help-t{font-family:var(--serif);font-size:18px;color:var(--cream)}
+  details.help summary .chev{margin-left:auto;color:var(--mono-green);font-family:var(--mono);font-size:14px;transition:transform .2s}
+  details.help[open] summary .chev{transform:rotate(180deg)}
+  details.help summary:hover .help-t{color:var(--green-strong)}
+  .help-body{padding:4px 24px 24px;border-top:1px solid var(--line-soft)}
+  .help-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px 32px;margin-top:18px}
+  @media(max-width:820px){.help-grid{grid-template-columns:1fr}}
+  .h-sec .h-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--mono-green);margin-bottom:8px}
+  .h-sec p, .h-sec li{font-size:13px;line-height:1.65}
+  .h-sec p{color:#b8b5ab}
+  .h-sec ul{margin:0;padding-left:16px}
+  .h-sec li{color:#b8b5ab;margin-bottom:5px}
+  .h-sec b{color:var(--cream);font-weight:500}
+  .h-sec .gr{color:var(--green)}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;margin-top:28px}
+  .panel-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    padding:18px 24px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap;
+  }
+  .step{font-family:var(--mono);font-size:11px;letter-spacing:.25em;color:var(--mono-green);text-transform:uppercase}
+  .panel-title{font-family:var(--serif);font-size:22px;font-weight:400;margin-top:6px}
+  .panel-body{padding:22px 24px}
+
+  .grid{display:grid;gap:18px}
+  .grid.g4{grid-template-columns:repeat(4,1fr)}
+  .grid.g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:860px){.grid.g4{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.grid.g4,.grid.g3{grid-template-columns:1fr}}
+
+  label.f{display:block}
+  label.f .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+  label.f .lbl em{font-style:normal;color:#5f5d55}
+  .inwrap{position:relative;margin-top:8px}
+  .inwrap .unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--muted);pointer-events:none}
+  input[type=text]{
+    width:100%;background:#0a0f0a;border:1px solid var(--line);border-radius:4px;color:var(--cream);
+    font-family:var(--mono);font-size:16px;padding:11px 40px 11px 12px;outline:none;transition:border-color .15s;
+  }
+  input[type=text]:focus{border-color:rgba(169,195,162,.55)}
+  input[type=text].bad{border-color:rgba(201,106,90,.75);background:rgba(201,106,90,.06)}
+  input[type=text]::placeholder{color:#4e4c45}
+
+  .stepper{display:flex;align-items:stretch;margin-top:8px;border:1px solid var(--line);border-radius:4px;background:#0a0f0a;overflow:hidden}
+  .stepper button{
+    width:44px;background:transparent;border:none;color:var(--green);font-size:20px;cursor:pointer;font-family:var(--mono);
+    transition:background .15s;
+  }
+  .stepper button:hover{background:rgba(169,195,162,.08)}
+  .stepper .val{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:18px;border-left:1px solid var(--line-soft);border-right:1px solid var(--line-soft)}
+
+  .hint{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:7px;line-height:1.5}
+  .hint b{color:var(--green);font-weight:400}
+  .hint .warn-t{color:var(--amber)}
+  .linkbtn{
+    background:none;border:none;color:var(--mono-green);font-family:var(--mono);font-size:11px;cursor:pointer;
+    text-decoration:underline;text-underline-offset:3px;padding:0;letter-spacing:.06em;text-align:left;
+  }
+  .linkbtn:hover{color:var(--green-strong)}
+  .savebtn{
+    background:rgba(169,195,162,.1);border:1px solid rgba(169,195,162,.4);color:var(--green-strong);
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    padding:9px 16px;border-radius:99px;cursor:pointer;transition:all .15s;white-space:nowrap;
+  }
+  .savebtn:hover{background:rgba(169,195,162,.2)}
+
+  /* Positions */
+  .positions{display:grid;gap:20px;margin-top:28px}
+  .pos{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .pos-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 22px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+  .pos-head .left{display:flex;align-items:center;gap:14px}
+  .pos-num{font-family:var(--mono);font-size:11px;letter-spacing:.25em;color:var(--mono-green);text-transform:uppercase}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.15em;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);text-transform:uppercase}
+  .badge.long{color:#9fca96;border-color:rgba(159,202,150,.4)}
+  .badge.short{color:#d0937f;border-color:rgba(208,147,127,.4)}
+  .share{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .share b{color:var(--cream);font-weight:400}
+
+  .wfield{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .wfield input[type=text]{width:74px;padding:7px 24px 7px 10px;font-size:14px}
+  .wfield .inwrap{margin-top:0}
+  .wfield .inwrap .unit{right:9px}
+
+  .mode{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+  .mode button{
+    background:transparent;border:none;color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;padding:6px 14px;cursor:pointer;transition:all .15s;
+  }
+  .mode button.on{background:rgba(169,195,162,.14);color:var(--green-strong)}
+
+  .pos-body{padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  @media(max-width:820px){.pos-body{grid-template-columns:1fr}}
+
+  .results{border-left:1px solid var(--line-soft);padding-left:26px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+  @media(max-width:820px){.results{border-left:none;padding-left:0;border-top:1px solid var(--line-soft);padding-top:18px}}
+  .lot-line{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .lot-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .lot-val{font-family:var(--serif);font-size:42px;color:var(--green-strong);line-height:1}
+  .lot-exact{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 18px}
+  .mini .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .mini .v{font-family:var(--mono);font-size:14.5px;margin-top:3px;color:var(--cream)}
+  .mini .v.pos-c{color:#9fca96}
+  .mini .v.neg-c{color:#d0937f}
+  .pos-warn{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--red);border:1px solid rgba(201,106,90,.35);border-radius:4px;padding:10px 12px;background:rgba(201,106,90,.06)}
+  .pos-warn.amber{color:var(--amber);border-color:rgba(201,163,90,.35);background:rgba(201,163,90,.05)}
+
+  /* Summary */
+  .summary{background:linear-gradient(135deg,#0d130d,#0b100c);border:1px solid rgba(169,195,162,.25)}
+  .sum-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+  @media(max-width:900px){.sum-grid{grid-template-columns:repeat(2,1fr)}}
+  .sum .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .sum .v{font-family:var(--serif);font-size:27px;margin-top:8px;color:var(--cream)}
+  .sum .v.green{color:var(--green-strong)}
+  .sum .v.red{color:#d0937f}
+  .sum .s{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px}
+
+  .tp-table{margin-top:24px;border-top:1px solid var(--line-soft);padding-top:18px}
+  .tp-table .t-head{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .tp-row{display:grid;grid-template-columns:110px 1fr 90px 110px 120px;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line-soft);font-family:var(--mono);font-size:12.5px}
+  .tp-row:last-child{border-bottom:none}
+  .tp-row .n{color:var(--mono-green);letter-spacing:.1em;text-transform:uppercase;font-size:10.5px}
+  .tp-row .bar{height:5px;border-radius:99px;background:rgba(233,230,221,.07);overflow:hidden}
+  .tp-row .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#84a884,#a9c3a2)}
+  .tp-row .r{text-align:right;color:var(--cream)}
+  .tp-row .r.g{color:#9fca96}
+  .tp-row .r.mut{color:var(--muted)}
+  @media(max-width:700px){.tp-row{grid-template-columns:90px 1fr 80px;}.tp-row .hide-m{display:none}}
+
+  .riskbar{margin-top:22px}
+  .riskbar .track{height:6px;border-radius:99px;background:rgba(233,230,221,.08);overflow:hidden}
+  .riskbar .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#84a884,#a9c3a2);transition:width .25s}
+  .riskbar .cap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:8px;letter-spacing:.08em}
+
+  footer{margin-top:34px;font-family:var(--mono);font-size:10.5px;color:#5f5d55;line-height:1.7;letter-spacing:.04em}
+  .copyright{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft);color:#4e4c45;font-size:10px;letter-spacing:.14em}
+
+  /* ---------- Smartphone-Optimierung ---------- */
+  @media(max-width:600px){
+    body{padding:22px 12px 56px;background-size:56px 56px}
+    .head-row{flex-wrap:wrap;gap:10px}
+    h1{font-size:clamp(27px,8.5vw,34px)}
+    .sub{font-size:10.5px;letter-spacing:.16em;margin-top:10px}
+    .langs{margin-top:6px}
+    .langs button{padding:7px 9px} /* größere Touch-Fläche */
+    .formula{margin-top:24px;padding:18px 14px;gap:12px 18px;font-size:15px}
+    .formula .note{font-size:10px;line-height:1.6}
+    details.help{margin-top:20px}
+    details.help summary{padding:14px 16px;gap:10px}
+    details.help summary .help-t{font-size:16px}
+    .help-body{padding:2px 16px 18px}
+    .panel{margin-top:20px}
+    .panel-head{padding:14px 16px}
+    .panel-title{font-size:19px}
+    .panel-body{padding:16px}
+    .grid{gap:14px}
+    .savebtn{padding:10px 16px;width:100%;text-align:center}
+    .positions{gap:14px;margin-top:20px}
+    .pos-head{padding:12px 16px;gap:10px}
+    .pos-body{padding:16px;gap:18px}
+    .results{padding-top:16px}
+    .lot-val{font-size:36px}
+    .wfield input[type=text]{font-size:16px;width:84px} /* 16px verhindert Auto-Zoom auf iOS */
+    .mode button{padding:8px 13px}
+    .stepper button{width:52px;font-size:22px} /* größere Touch-Flächen */
+    .sum-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+    .sum .v{font-size:22px}
+    .tp-row{grid-template-columns:70px 1fr 84px;gap:10px;font-size:12px}
+    .pos-warn{margin-top:20px}
+    footer{margin-top:24px}
+  }
+  @media(max-width:380px){
+    .sum-grid{grid-template-columns:1fr 1fr;gap:12px}
+    .sum .v{font-size:19px}
+  }
+</style>
+</head>
+<body>
+<noscript>
+  <div class="noscript-warn">
+    ⚠ Dieser Rechner benötigt JavaScript. Die Datei wird gerade nur als Vorschau angezeigt (z.&nbsp;B. iPhone-Schnellansicht in „Dateien“) —
+    bitte in einem echten Browser bzw. einer App mit aktiviertem JavaScript öffnen oder die Datei online hosten.<br>
+    ⚠ This calculator requires JavaScript. You are currently viewing a static preview (e.&nbsp;g. iPhone Quick Look in “Files”) —
+    please open it in a real browser or an app with JavaScript enabled, or host the file online.
+  </div>
+</noscript>
+<div class="wrap">
+  <div class="head-row">
+    <div>
+      <h1 data-i18n="title">Positionsgrößen&#8209;Rechner</h1>
+      <div class="sub" data-i18n="sub">XAUUSD · Gold · Risiko-basierte Lot-Berechnung</div>
+    </div>
+    <div class="langs">
+      <button type="button" id="langDe" class="on" title="Deutsch" aria-label="Deutsch">
+        <svg viewBox="0 0 60 36"><rect width="60" height="12" fill="#111"/><rect y="12" width="60" height="12" fill="#DD0000"/><rect y="24" width="60" height="12" fill="#FFCC00"/></svg>
+      </button>
+      <button type="button" id="langEn" title="English" aria-label="English">
+        <svg viewBox="0 0 60 36"><rect width="60" height="36" fill="#012169"/><path d="M0,0 60,36 M60,0 0,36" stroke="#fff" stroke-width="7"/><path d="M0,0 60,36 M60,0 0,36" stroke="#C8102E" stroke-width="3"/><path d="M30,0 v36 M0,18 h60" stroke="#fff" stroke-width="12"/><path d="M30,0 v36 M0,18 h60" stroke="#C8102E" stroke-width="7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="formula">
+    <span class="lhs" data-i18n="fLhs">Lot pro Position</span>
+    <span class="eq">=</span>
+    <span class="frac">
+      <span class="top" data-i18n="fTop">Gewichtung × Gesamt-Lot</span>
+      <span class="bot" data-i18n="fBot">Gesamt-Lot so, dass Σ Risiko = Risikobetrag (Konto × %)</span>
+    </span>
+    <span class="note" data-i18n="fNote">Lots verteilen sich nach Gewichtung · das Gesamtrisiko bleibt exakt dein Budget</span>
+  </div>
+
+  <!-- Hilfe / Anleitung -->
+  <details class="help">
+    <summary>
+      <span class="step" data-i18n="helpStep">Anleitung</span>
+      <span class="help-t" data-i18n="helpTitle">Bedienung des Rechners</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="help-body">
+      <div class="help-grid" id="helpGrid"></div>
+    </div>
+  </details>
+
+  <!-- Global parameters -->
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <div class="step" data-i18n="step01">Schritt 01 — Vorabparameter</div>
+        <div class="panel-title" data-i18n="title01">Konto &amp; Gesamtrisiko</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span class="hint" id="saveMsg" style="margin-top:0"></span>
+        <button type="button" class="savebtn" id="saveTpl" data-i18n="saveBtn">⤓ Als Vorlage speichern</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="grid g4">
+        <label class="f">
+          <span class="lbl" data-i18n="lblAcct">Kontostand <em>aktuell</em></span>
+          <span class="inwrap"><input type="text" id="acct" value="50.000" inputmode="decimal"><span class="unit">$</span></span>
+        </label>
+        <label class="f">
+          <span class="lbl" data-i18n="lblRiskPct">Gesamtrisiko</span>
+          <span class="inwrap"><input type="text" id="riskPct" value="1" inputmode="decimal"><span class="unit">%</span></span>
+          <span class="hint" id="riskPctHint"></span>
+        </label>
+        <label class="f">
+          <span class="lbl" data-i18n="lblRiskAmt">Risikobetrag <em>gekoppelt</em></span>
+          <span class="inwrap"><input type="text" id="riskAmt" inputmode="decimal"><span class="unit">$</span></span>
+          <span class="hint" data-i18n="hintRiskAmt">Für <b>alle</b> Positionen zusammen</span>
+        </label>
+        <label class="f">
+          <span class="lbl" data-i18n="lblPointVal">Punktwert pro Lot <em>1 $ Bewegung</em></span>
+          <span class="inwrap"><input type="text" id="pointVal" value="100" inputmode="decimal"><span class="unit">$</span></span>
+          <span class="hint" data-i18n="hintPointVal">XAUUSD: 1,0 Lot = 100 Unzen</span>
+        </label>
+      </div>
+      <div class="grid g4" style="margin-top:20px">
+        <label class="f">
+          <span class="lbl" data-i18n="lblCount">Anzahl Positionen</span>
+          <span class="stepper">
+            <button type="button" id="posMinus" aria-label="-">−</button>
+            <span class="val" id="posCountLbl">1</span>
+            <button type="button" id="posPlus" aria-label="+">+</button>
+          </span>
+        </label>
+        <div style="grid-column:span 3;align-self:end">
+          <div class="hint" id="weightHint"></div>
+          <div class="hint" style="margin-top:4px">
+            <button type="button" class="linkbtn" id="eqWeights" data-i18n="eqBtn">↺ Standard-Gewichtung (Pos 1 = 50 %, Rest teilt sich 50 %)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weight warning -->
+  <div class="pos-warn" id="weightWarn" style="display:none;margin-top:28px"></div>
+
+  <!-- Position cards -->
+  <div class="positions" id="positions"></div>
+
+  <!-- Summary -->
+  <div class="panel summary">
+    <div class="panel-head">
+      <div>
+        <div class="step" data-i18n="step03">Schritt 03 — Ergebnis</div>
+        <div class="panel-title" data-i18n="title03">Gesamtübersicht</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="sum-grid">
+        <div class="sum"><div class="k" data-i18n="kSumLots">Summe Lots</div><div class="v green" id="sumLots">—</div><div class="s" id="sumLotsSub"></div></div>
+        <div class="sum"><div class="k" data-i18n="kSumRisk">Tatsächl. Risiko</div><div class="v red" id="sumRisk">—</div><div class="s" id="sumRiskSub"></div></div>
+        <div class="sum"><div class="k" data-i18n="kSumProfit">Gewinnpotenzial</div><div class="v green" id="sumProfit">—</div><div class="s" id="sumProfitSub"></div></div>
+        <div class="sum"><div class="k" data-i18n="kSumRRR">Gesamt-CRV</div><div class="v" id="sumRRR">—</div><div class="s" data-i18n="sRRR">Gewinn ÷ Risiko</div></div>
+        <div class="sum"><div class="k" data-i18n="kAcctAfter">Konto nach SL</div><div class="v" id="acctAfter">—</div><div class="s" data-i18n="sAcctAfter">wenn alle SL treffen</div></div>
+      </div>
+
+      <div class="tp-table" id="tpTable" style="display:none">
+        <div class="t-head" data-i18n="tpHead">TP-Aufschlüsselung — Anteil an der Gesamt-Lotgröße</div>
+        <div id="tpRows"></div>
+      </div>
+
+      <div class="riskbar">
+        <div class="track"><div class="fill" id="riskFill" style="width:0%"></div></div>
+        <div class="cap"><span id="riskCapL"></span><span id="riskCapR"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span data-i18n="footer">Rechnung: Die Gesamt-Lotgröße wird so bestimmt, dass die Summe aller Einzelrisiken exakt dem Risikobetrag entspricht;
+    die Lots verteilen sich nach deiner Gewichtung (Gewichte werden automatisch auf 100 % normalisiert).
+    Jede Position hat eigenen SL &amp; TP — alle TPs fließen einzeln ins Gewinnpotenzial ein.
+    Positionen 2+ übernehmen Entry &amp; SL automatisch von Position 1, bis du sie dort selbst überschreibst.
+    Lots werden konservativ auf 0,01 abgerundet, damit das Budget nie überschritten wird.
+    Immer vom aktuellen Kontostand rechnen, nicht vom Startkapital. Keine Anlageberatung.</span>
+    <div class="copyright">© <span id="cpYear"></span> NBL</div>
+  </footer>
+</div>
+
+<script type="application/json" id="preset">null</script>
+<script>
+(function(){
+  'use strict';
+  // Unveränderte Seitenquelle sichern, bevor JS die Positionskarten aufbaut —
+  // dient als Basis für den Vorlagen-Download (Preset-Block wird dort ersetzt).
+  var PRISTINE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+  var MAX_POS = 10, MIN_LOT = 0.01;
+  var LANG = 'de';
+  var state = { count: 1, positions: [] };
+
+  // ================= I18N =================
+  var I18N = {
+    de: {
+      title:'Positionsgrößen&#8209;Rechner',
+      sub:'XAUUSD · Gold · Risiko-basierte Lot-Berechnung',
+      fLhs:'Lot pro Position', fTop:'Gewichtung × Gesamt-Lot',
+      fBot:'Gesamt-Lot so, dass Σ Risiko = Risikobetrag (Konto × %)',
+      fNote:'Lots verteilen sich nach Gewichtung · das Gesamtrisiko bleibt exakt dein Budget',
+      helpStep:'Anleitung', helpTitle:'Bedienung des Rechners',
+      step01:'Schritt 01 — Vorabparameter', title01:'Konto &amp; Gesamtrisiko',
+      saveBtn:'⤓ Als Vorlage speichern',
+      lblAcct:'Kontostand <em>aktuell</em>', lblRiskPct:'Gesamtrisiko',
+      lblRiskAmt:'Risikobetrag <em>gekoppelt</em>', hintRiskAmt:'Für <b>alle</b> Positionen zusammen',
+      lblPointVal:'Punktwert pro Lot <em>1 $ Bewegung</em>', hintPointVal:'XAUUSD: 1,0 Lot = 100 Unzen',
+      lblCount:'Anzahl Positionen',
+      eqBtn:'↺ Standard-Gewichtung (Pos 1 = 50 %, Rest teilt sich 50 %)',
+      step03:'Schritt 03 — Ergebnis', title03:'Gesamtübersicht',
+      kSumLots:'Summe Lots', kSumRisk:'Tatsächl. Risiko', kSumProfit:'Gewinnpotenzial',
+      kSumRRR:'Gesamt-CRV', sRRR:'Gewinn ÷ Risiko', kAcctAfter:'Konto nach SL', sAcctAfter:'wenn alle SL treffen',
+      tpHead:'TP-Aufschlüsselung — Anteil an der Gesamt-Lotgröße',
+      footer:'Rechnung: Die Gesamt-Lotgröße wird so bestimmt, dass die Summe aller Einzelrisiken exakt dem Risikobetrag entspricht; die Lots verteilen sich nach deiner Gewichtung (Gewichte werden automatisch auf 100 % normalisiert). Jede Position hat eigenen SL &amp; TP — alle TPs fließen einzeln ins Gewinnpotenzial ein. Positionen 2+ übernehmen Entry &amp; SL automatisch von Position 1, bis du sie dort selbst überschreibst. Lots werden konservativ auf 0,01 abgerundet, damit das Budget nie überschritten wird. Immer vom aktuellen Kontostand rechnen, nicht vom Startkapital. Keine Anlageberatung.',
+      // Karten
+      position:'Position', weight:'Gewicht', share:'Anteil', modePrice:'Preise', modeDist:'Distanz $',
+      lblEntry:'Entry', lblSL:'Stop-Loss', lblTP:'Take-Profit <em>optional</em>',
+      lblSLd:'SL-Distanz', lblTPd:'TP-Distanz <em>optional</em>',
+      phEntry:'4.010,00', phSL:'3.998,00', phTP:'4.034,00', phSLd:'12,00', phTPd:'24,00',
+      lot:'Lot', exact:'exakt', kRisk:'Tatsächl. Risiko', kProfit:'Gewinn bei TP', kSLd:'SL-Distanz', kRRR:'CRV',
+      slInfoSL:'SL-Distanz', slInfoTP:'TP-Distanz',
+      // Dynamik
+      riskTotal:'= {x} gesamt',
+      wBase:'Gewichtung = Anteil an der Gesamt-Lotgröße. ',
+      wOverShort:'<span class="warn-t">Summe: {x} % — über 100 %!</span>',
+      wOverLong:'⚠ Gewichtung überschreitet 100 %: Die Gewichte summieren sich zu {x} % ({y} Prozentpunkte zu viel — leere Felder zählen als gleicher Anteil). Bitte reduziere die Gewichte. Bis dahin rechnet der Rechner proportional auf 100-%-Basis weiter, damit dein Risiko-Budget nicht überschritten wird.',
+      wUnder:'<span class="warn-t">Summe der Gewichte: {x} % → wird auf 100 % normalisiert.</span>',
+      wOk:'Das Gesamtrisiko ({x}) gilt für alle Positionen zusammen.',
+      errSlEq:'Stop-Loss darf nicht gleich dem Entry sein.',
+      errSlPos:'SL-Distanz muss größer als 0 sein.',
+      errTpLong:'TP liegt beim Long unter dem Entry.',
+      errTpShort:'TP liegt beim Short über dem Entry.',
+      warnMinLot:'Lot rundet auf 0,00 ab — Anteil zu klein für 0,01 Lot. Gewichtung/Risiko erhöhen, SL enger setzen oder weniger Positionen.',
+      warnRounded:'Abgerundet von {a} auf {b} Lot — genutztes Risiko: {c}.',
+      sumCalc:'{a} von {n} Position(en) berechnet',
+      ofAcct:'{x} % vom Konto',
+      ofAcctTP:'+{x} % vom Konto (alle TPs summiert)',
+      enterTPs:'TPs eintragen für Prognose',
+      noTP:'kein TP', lotUnit:'Lot', shareUnit:'% Anteil',
+      budgetUsed:'Risiko-Budget genutzt: {x}',
+      savedOk:'Vorlage heruntergeladen ✓',
+      savedFail:'Download hier nicht möglich — Datei bitte im Browser öffnen.',
+      fileName:'positionsrechner-vorlage.html',
+      // Hilfe-Inhalte
+      help:[
+        ['1 · Vorabparameter','<ul><li><b>Kontostand</b> — immer der aktuelle Stand, nicht das Startkapital.</li><li><b>Gesamtrisiko</b> — %- und $-Feld sind gekoppelt; änderst du eines, rechnet das andere mit. Der Betrag gilt für <b>alle Positionen zusammen</b>.</li><li><b>Punktwert pro Lot</b> — Wert einer 1-$-Bewegung (XAUUSD: 100).</li><li><b>Anzahl Positionen</b> — über −/+ einstellbar (1–10), erzeugt je eine Karte.</li></ul>'],
+        ['2 · Positionen eingeben','<ul><li>Pro Karte umschaltbar: <b>Preise</b> (Entry/SL/TP als Kurse, Richtung wird erkannt) oder <b>Distanz $</b> (SL-/TP-Distanz direkt).</li><li>Positionen 2+ übernehmen <b>Entry &amp; SL live von Position 1</b>, bis du sie dort selbst überschreibst. TP bleibt leer und wird je Position gesetzt.</li><li>Take-Profit ist optional — ohne TP entfällt nur die Gewinnprognose.</li></ul>'],
+        ['3 · Gewichtung','<ul><li>Das Gewicht bestimmt den <b>Anteil an der Gesamt-Lotgröße</b>.</li><li>Standard: 1 Position → 100 %; ab 2 Positionen → Pos 1 = 50 %, der Rest teilt sich 50 % gleichmäßig. Reset über <span class="gr">„↺ Standard-Gewichtung"</span>.</li><li>Summen unter 100 % werden automatisch normalisiert; über 100 % erscheint eine <b>rote Warnung</b> — gerechnet wird bis zur Korrektur sicher auf 100-%-Basis.</li></ul>'],
+        ['4 · Ergebnisse je Position','<ul><li><b>Lot</b> wird konservativ auf 0,01 <b>abgerundet</b> (exakter Wert daneben) — dein Budget wird nie überschritten.</li><li>Dazu: tatsächliches Risiko, Gewinn bei TP, SL-Distanz und CRV.</li><li>Rote Hinweise erscheinen bei ungültigen Eingaben oder wenn der Anteil für 0,01 Lot zu klein ist.</li></ul>'],
+        ['5 · Gesamtübersicht','<ul><li>Summe Lots, Gesamtrisiko ($ und % vom Konto), Gewinnpotenzial (alle TPs einzeln summiert), Gesamt-CRV und Konto nach SL.</li><li>Ab zwei Positionen zeigt die <b>TP-Aufschlüsselung</b> Lot-Anteil und Gewinn je Position; der Balken darunter zeigt die Auslastung des Risiko-Budgets.</li></ul>'],
+        ['6 · Vorlagen speichern','<ul><li><span class="gr">„⤓ Als Vorlage speichern"</span> lädt eine eigenständige HTML-Datei mit dem kompletten aktuellen Zustand als neue Standardwerte herunter.</li><li>Die Datei im Browser öffnen — sie startet mit deinen Werten (inkl. Sprache) und kann selbst wieder als Vorlage gespeichert werden.</li></ul>']
+      ]
+    },
+    en: {
+      title:'Position Size Calculator',
+      sub:'XAUUSD · Gold · Risk-based lot sizing',
+      fLhs:'Lots per position', fTop:'Weight × total lots',
+      fBot:'Total lots sized so that Σ risk = risk amount (account × %)',
+      fNote:'Lots are distributed by weight · total risk always equals your budget',
+      helpStep:'Guide', helpTitle:'How to use this calculator',
+      step01:'Step 01 — Presets', title01:'Account &amp; Total Risk',
+      saveBtn:'⤓ Save as template',
+      lblAcct:'Account balance <em>current</em>', lblRiskPct:'Total risk',
+      lblRiskAmt:'Risk amount <em>linked</em>', hintRiskAmt:'For <b>all</b> positions combined',
+      lblPointVal:'Point value per lot <em>per $1 move</em>', hintPointVal:'XAUUSD: 1.0 lot = 100 oz',
+      lblCount:'Number of positions',
+      eqBtn:'↺ Default weighting (pos 1 = 50 %, rest splits 50 %)',
+      step03:'Step 03 — Result', title03:'Overall Summary',
+      kSumLots:'Total lots', kSumRisk:'Actual risk', kSumProfit:'Profit potential',
+      kSumRRR:'Total RRR', sRRR:'Profit ÷ risk', kAcctAfter:'Account after SL', sAcctAfter:'if all SLs are hit',
+      tpHead:'TP breakdown — share of total lot size',
+      footer:'Calculation: the total lot size is determined so that the sum of all individual risks exactly equals the risk amount; lots are distributed according to your weighting (weights are automatically normalized to 100 %). Each position has its own SL &amp; TP — every TP feeds individually into the profit potential. Positions 2+ automatically inherit entry &amp; SL from position 1 until you override them there. Lots are conservatively rounded down to 0.01 so the budget is never exceeded. Always calculate from the current account balance, not from the starting capital. Not financial advice.',
+      // Cards
+      position:'Position', weight:'Weight', share:'Share', modePrice:'Prices', modeDist:'Distance $',
+      lblEntry:'Entry', lblSL:'Stop loss', lblTP:'Take profit <em>optional</em>',
+      lblSLd:'SL distance', lblTPd:'TP distance <em>optional</em>',
+      phEntry:'4,010.00', phSL:'3,998.00', phTP:'4,034.00', phSLd:'12.00', phTPd:'24.00',
+      lot:'Lots', exact:'exact', kRisk:'Actual risk', kProfit:'Profit at TP', kSLd:'SL distance', kRRR:'RRR',
+      slInfoSL:'SL distance', slInfoTP:'TP distance',
+      // Dynamics
+      riskTotal:'= {x} total',
+      wBase:'Weight = share of total lot size. ',
+      wOverShort:'<span class="warn-t">Sum: {x} % — above 100 %!</span>',
+      wOverLong:'⚠ Weighting exceeds 100 %: your weights add up to {x} % ({y} percentage points too much — empty fields count as an equal share). Please reduce the weights. Until then the calculator keeps working proportionally on a 100 % basis, so your risk budget is never exceeded.',
+      wUnder:'<span class="warn-t">Weights sum to {x} % → normalized to 100 %.</span>',
+      wOk:'The total risk ({x}) applies to all positions combined.',
+      errSlEq:'Stop loss must not equal the entry.',
+      errSlPos:'SL distance must be greater than 0.',
+      errTpLong:'TP is below the entry on a long.',
+      errTpShort:'TP is above the entry on a short.',
+      warnMinLot:'Lots round down to 0.00 — share too small for 0.01 lots. Increase weight/risk, tighten the SL or use fewer positions.',
+      warnRounded:'Rounded down from {a} to {b} lots — risk used: {c}.',
+      sumCalc:'{a} of {n} position(s) calculated',
+      ofAcct:'{x} % of account',
+      ofAcctTP:'+{x} % of account (all TPs summed)',
+      enterTPs:'Enter TPs for a projection',
+      noTP:'no TP', lotUnit:'lots', shareUnit:'% share',
+      budgetUsed:'Risk budget used: {x}',
+      savedOk:'Template downloaded ✓',
+      savedFail:'Download not possible here — please open the file in a browser.',
+      fileName:'position-calculator-template.html',
+      // Help content
+      help:[
+        ['1 · Presets','<ul><li><b>Account balance</b> — always the current balance, not the starting capital.</li><li><b>Total risk</b> — the % and $ fields are linked; change one and the other updates. The amount applies to <b>all positions combined</b>.</li><li><b>Point value per lot</b> — value of a $1 move (XAUUSD: 100).</li><li><b>Number of positions</b> — set via −/+ (1–10), creates one card each.</li></ul>'],
+        ['2 · Entering positions','<ul><li>Each card can be switched between <b>Prices</b> (entry/SL/TP as quotes, direction is detected) and <b>Distance $</b> (SL/TP distance directly).</li><li>Positions 2+ inherit <b>entry &amp; SL live from position 1</b> until you override them there. TP stays empty and is set per position.</li><li>Take profit is optional — without a TP you only lose the profit projection.</li></ul>'],
+        ['3 · Weighting','<ul><li>The weight sets a position\'s <b>share of the total lot size</b>.</li><li>Default: 1 position → 100 %; from 2 positions → pos 1 = 50 %, the rest splits the remaining 50 % equally. Reset via <span class="gr">"↺ Default weighting"</span>.</li><li>Sums below 100 % are automatically normalized; above 100 % a <b>red warning</b> appears — until corrected, the maths safely runs on a 100 % basis.</li></ul>'],
+        ['4 · Per-position results','<ul><li><b>Lots</b> are conservatively <b>rounded down</b> to 0.01 (exact value shown next to it) — your budget is never exceeded.</li><li>Plus: actual risk, profit at TP, SL distance and RRR.</li><li>Red notices appear for invalid inputs or when the share is too small for 0.01 lots.</li></ul>'],
+        ['5 · Overall summary','<ul><li>Total lots, total risk ($ and % of account), profit potential (all TPs summed individually), total RRR and account after SL.</li><li>From two positions the <b>TP breakdown</b> shows lot share and profit per position; the bar below shows how much of the risk budget is used.</li></ul>'],
+        ['6 · Saving templates','<ul><li><span class="gr">"⤓ Save as template"</span> downloads a standalone HTML file with the complete current state embedded as new defaults.</li><li>Open the file in a browser — it starts with your values (including language) and can itself be saved as a new template.</li></ul>']
+      ]
+    }
+  };
+  function t(k){ var v = I18N[LANG][k]; return v !== undefined ? v : (I18N.de[k] !== undefined ? I18N.de[k] : k); }
+  function tf(k, repl){
+    var s = t(k);
+    Object.keys(repl || {}).forEach(function(key){ s = s.split('{' + key + '}').join(repl[key]); });
+    return s;
+  }
+
+  // ---------- number helpers (locale-aware) ----------
+  function parseNumL(str, lang){
+    if(str == null) return NaN;
+    str = String(str).trim();
+    if(!str) return NaN;
+    if(lang === 'en'){
+      str = str.replace(/,/g,'');
+    } else {
+      var hasComma = str.indexOf(',') >= 0;
+      if(hasComma){
+        str = str.replace(/\./g,'').replace(',','.');
+      } else {
+        if(/^\d{1,3}(\.\d{3})+$/.test(str)) str = str.replace(/\./g,'');
+      }
+    }
+    var v = parseFloat(str.replace(/[^0-9.\-]/g,''));
+    return isFinite(v) ? v : NaN;
+  }
+  function parseNum(str){ return parseNumL(str, LANG); }
+  function locale(){ return LANG === 'de' ? 'de-DE' : 'en-US'; }
+  function fmt(v, dec){
+    if(!isFinite(v)) return '—';
+    if(dec === undefined) dec = 2;
+    return v.toLocaleString(locale(),{minimumFractionDigits:dec, maximumFractionDigits:dec});
+  }
+  function fmtTrim(v, dec){
+    if(!isFinite(v)) return '—';
+    return v.toLocaleString(locale(),{minimumFractionDigits:0, maximumFractionDigits:dec === undefined ? 2 : dec});
+  }
+  function money(v){
+    if(!isFinite(v)) return '—';
+    return LANG === 'de' ? fmt(v) + ' $' : '$' + fmt(v);
+  }
+  function floor2(v){ return Math.floor((v + 1e-9) * 100) / 100; }
+
+  // ---------- DOM ----------
+  var $ = function(id){ return document.getElementById(id); };
+  var acctEl = $('acct'), riskPctEl = $('riskPct'), riskAmtEl = $('riskAmt'), pointValEl = $('pointVal');
+  var posWrap = $('positions');
+
+  function defaultPos(prefill){
+    var de = LANG === 'de';
+    return prefill
+      ? { mode:'price', entry: de?'4.010,00':'4,010.00', sl: de?'3.998,00':'3,998.00', tp: de?'4.034,00':'4,034.00', slDist:'', tpDist:'', weight:'100' }
+      : { mode:'price', entry:'', sl:'', tp:'', slDist:'', tpDist:'', weight:'' };
+  }
+  state.positions.push(defaultPos(true));
+
+  // ---------- language ----------
+  function applyLang(){
+    document.documentElement.lang = LANG;
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      el.innerHTML = t(el.getAttribute('data-i18n'));
+    });
+    // Hilfe-Inhalte
+    $('helpGrid').innerHTML = t('help').map(function(sec){
+      return '<div class="h-sec"><div class="h-h">' + sec[0] + '</div>' + sec[1] + '</div>';
+    }).join('');
+    $('langDe').classList.toggle('on', LANG === 'de');
+    $('langEn').classList.toggle('on', LANG === 'en');
+    document.title = LANG === 'de' ? 'Positionsgrößen-Rechner · XAUUSD' : 'Position Size Calculator · XAUUSD';
+  }
+
+  function convFmt(val, from, to){
+    var v = parseNumL(val, from);
+    if(!isFinite(v)) return val;
+    return v.toLocaleString(to === 'de' ? 'de-DE' : 'en-US', {minimumFractionDigits:0, maximumFractionDigits:4});
+  }
+  function setLang(l){
+    if(l === LANG) return;
+    var from = LANG;
+    // Zahlenformate aller Eingaben konvertieren
+    [acctEl, riskPctEl, riskAmtEl, pointValEl].forEach(function(el){ el.value = convFmt(el.value, from, l); });
+    state.positions.forEach(function(p){
+      ['entry','sl','tp','slDist','tpDist','weight'].forEach(function(f){
+        if(p[f]) p[f] = convFmt(p[f], from, l);
+      });
+    });
+    LANG = l;
+    applyLang();
+    renderCards();
+    recalc();
+  }
+  $('langDe').addEventListener('click', function(){ setLang('de'); });
+  $('langEn').addEventListener('click', function(){ setLang('en'); });
+
+  // ---------- weights ----------
+  // Standard: 1 Position -> 100 % | ab 2 Positionen -> Pos 1 = 50 %, Rest teilt sich 50 % gleichmäßig
+  function standardWeights(){
+    for(var i=0;i<state.count;i++){
+      var wv = state.count === 1 ? 100 : (i === 0 ? 50 : 50/(state.count-1));
+      state.positions[i].weight = fmtTrim(wv, 2);
+      var card = posWrap.children[i];
+      if(card){ card.querySelector('input[data-f=weight]').value = state.positions[i].weight; }
+    }
+  }
+  // Entry & SL von Position 1 an alle nicht manuell geänderten Positionen weiterreichen
+  function propagateFromFirst(f){
+    for(var j=1;j<state.count;j++){
+      var pj = state.positions[j];
+      if(!pj || pj[f + 'Touched']) continue;
+      pj[f] = state.positions[0][f];
+      var card = posWrap.children[j];
+      if(card){ card.querySelector('input[data-f=' + f + ']').value = pj[f]; }
+    }
+  }
+  function weightOf(p){
+    var v = parseNum(p.weight);
+    if(!isFinite(v) || v < 0) return 100 / state.count;
+    return v;
+  }
+
+  // ---------- position cards ----------
+  function buildCard(i){
+    var p = state.positions[i];
+    var card = document.createElement('div');
+    card.className = 'pos';
+    card.innerHTML =
+      '<div class="pos-head">' +
+        '<div class="left">' +
+          '<span class="pos-num">' + t('position') + ' ' + String(i+1).padStart(2,'0') + '</span>' +
+          '<span class="badge" data-r="dir">—</span>' +
+          '<span class="share" data-r="share"></span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">' +
+          '<label class="wfield">' + t('weight') +
+            '<span class="inwrap"><input type="text" data-f="weight" inputmode="decimal"><span class="unit">%</span></span>' +
+          '</label>' +
+          '<span class="mode">' +
+            '<button type="button" data-mode="price">' + t('modePrice') + '</button>' +
+            '<button type="button" data-mode="dist">' + t('modeDist') + '</button>' +
+          '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pos-body">' +
+        '<div>' +
+          '<div class="grid g3" data-r="priceFields">' +
+            '<label class="f"><span class="lbl">' + t('lblEntry') + '</span><span class="inwrap"><input type="text" data-f="entry" inputmode="decimal" placeholder="' + t('phEntry') + '"><span class="unit">$</span></span></label>' +
+            '<label class="f"><span class="lbl">' + t('lblSL') + '</span><span class="inwrap"><input type="text" data-f="sl" inputmode="decimal" placeholder="' + t('phSL') + '"><span class="unit">$</span></span></label>' +
+            '<label class="f"><span class="lbl">' + t('lblTP') + '</span><span class="inwrap"><input type="text" data-f="tp" inputmode="decimal" placeholder="' + t('phTP') + '"><span class="unit">$</span></span></label>' +
+          '</div>' +
+          '<div class="grid g3" data-r="distFields" style="display:none">' +
+            '<label class="f"><span class="lbl">' + t('lblSLd') + '</span><span class="inwrap"><input type="text" data-f="slDist" inputmode="decimal" placeholder="' + t('phSLd') + '"><span class="unit">$</span></span></label>' +
+            '<label class="f"><span class="lbl">' + t('lblTPd') + '</span><span class="inwrap"><input type="text" data-f="tpDist" inputmode="decimal" placeholder="' + t('phTPd') + '"><span class="unit">$</span></span></label>' +
+          '</div>' +
+          '<div class="hint" data-r="slInfo" style="margin-top:14px"></div>' +
+        '</div>' +
+        '<div class="results">' +
+          '<div class="lot-line">' +
+            '<span class="lot-lbl">' + t('lot') + '</span>' +
+            '<span class="lot-val" data-r="lot">—</span>' +
+            '<span class="lot-exact" data-r="lotExact"></span>' +
+          '</div>' +
+          '<div class="mini-grid">' +
+            '<div class="mini"><div class="k">' + t('kRisk') + '</div><div class="v neg-c" data-r="risk">—</div></div>' +
+            '<div class="mini"><div class="k">' + t('kProfit') + '</div><div class="v pos-c" data-r="profit">—</div></div>' +
+            '<div class="mini"><div class="k">' + t('kSLd') + '</div><div class="v" data-r="slD">—</div></div>' +
+            '<div class="mini"><div class="k">' + t('kRRR') + '</div><div class="v" data-r="rrr">—</div></div>' +
+          '</div>' +
+          '<div class="pos-warn" data-r="warn" style="display:none"></div>' +
+        '</div>' +
+      '</div>';
+
+    card.querySelectorAll('.mode button').forEach(function(b){
+      b.addEventListener('click', function(){
+        p.mode = b.getAttribute('data-mode');
+        syncCardMode(card, p);
+        recalc();
+      });
+    });
+    card.querySelectorAll('input[data-f]').forEach(function(inp){
+      inp.value = p[inp.getAttribute('data-f')] || '';
+      inp.addEventListener('input', function(){
+        var f = inp.getAttribute('data-f');
+        p[f] = inp.value;
+        if(f === 'entry' || f === 'sl'){
+          if(i === 0) propagateFromFirst(f);
+          else p[f + 'Touched'] = true;
+        }
+        recalc();
+      });
+    });
+    syncCardMode(card, p);
+    return card;
+  }
+
+  function syncCardMode(card, p){
+    card.querySelectorAll('.mode button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-mode') === p.mode);
+    });
+    card.querySelector('[data-r=priceFields]').style.display = p.mode === 'price' ? '' : 'none';
+    card.querySelector('[data-r=distFields]').style.display = p.mode === 'dist' ? '' : 'none';
+  }
+
+  function renderCards(){
+    posWrap.innerHTML = '';
+    for(var i=0;i<state.count;i++){
+      if(!state.positions[i]){
+        var np = defaultPos(false);
+        if(i > 0 && state.positions[0]){ np.entry = state.positions[0].entry; np.sl = state.positions[0].sl; } // Entry & SL von Pos 1, TP bleibt leer
+        state.positions[i] = np;
+      }
+      posWrap.appendChild(buildCard(i));
+    }
+  }
+
+  // ---------- risk coupling ----------
+  var riskLock = false;
+  function acctVal(){ return parseNum(acctEl.value); }
+  function syncRiskFromPct(){
+    if(riskLock) return; riskLock = true;
+    var a = acctVal(), p = parseNum(riskPctEl.value);
+    riskAmtEl.value = (isFinite(a) && isFinite(p)) ? fmt(a*p/100) : '';
+    riskLock = false;
+  }
+  function syncRiskFromAmt(){
+    if(riskLock) return; riskLock = true;
+    var a = acctVal(), m = parseNum(riskAmtEl.value);
+    riskPctEl.value = (isFinite(a) && a>0 && isFinite(m)) ? fmtTrim(m/a*100, 3) : '';
+    riskLock = false;
+  }
+  acctEl.addEventListener('input', function(){ syncRiskFromPct(); recalc(); });
+  riskPctEl.addEventListener('input', function(){ syncRiskFromPct(); recalc(); });
+  riskAmtEl.addEventListener('input', function(){ syncRiskFromAmt(); recalc(); });
+  pointValEl.addEventListener('input', recalc);
+
+  // ---------- stepper ----------
+  $('posMinus').addEventListener('click', function(){ setCount(state.count-1); });
+  $('posPlus').addEventListener('click', function(){ setCount(state.count+1); });
+  $('eqWeights').addEventListener('click', function(){ standardWeights(); recalc(); });
+  function setCount(n){
+    n = Math.max(1, Math.min(MAX_POS, n));
+    if(n === state.count) return;
+    state.count = n;
+    $('posCountLbl').textContent = n;
+    renderCards();
+    standardWeights();
+    recalc();
+  }
+
+  // ---------- geometry ----------
+  function parseGeom(p){
+    var slDist, tpDist = NaN, dir = null, err = null;
+    if(p.mode === 'price'){
+      var e = parseNum(p.entry), s = parseNum(p.sl), tp = parseNum(p.tp);
+      if(!isFinite(e) || !isFinite(s)) return { empty:true };
+      slDist = Math.abs(e - s);
+      dir = s < e ? 'long' : (s > e ? 'short' : null);
+      if(slDist <= 0) err = t('errSlEq');
+      if(isFinite(tp)){
+        tpDist = Math.abs(tp - e);
+        if(dir === 'long' && tp <= e) err = err || t('errTpLong');
+        if(dir === 'short' && tp >= e) err = err || t('errTpShort');
+      }
+    } else {
+      slDist = parseNum(p.slDist);
+      tpDist = parseNum(p.tpDist);
+      if(!isFinite(slDist)) return { empty:true };
+      if(slDist <= 0) err = t('errSlPos');
+    }
+    if(err) return { error: err };
+    return { dir: dir, slDist: slDist, tpDist: tpDist };
+  }
+
+  // ---------- core ----------
+  function recalc(){
+    var acct = acctVal();
+    var riskAmt = parseNum(riskAmtEl.value);
+    var pointVal = parseNum(pointValEl.value);
+    var n = state.count;
+    var cards = posWrap.children;
+
+    $('riskPctHint').textContent = isFinite(riskAmt) ? tf('riskTotal', {x: money(riskAmt)}) : '';
+
+    // weights
+    var w = [], W_all = 0, i;
+    for(i=0;i<n;i++){ w[i] = weightOf(state.positions[i]); W_all += w[i]; }
+    if(W_all <= 0){ for(i=0;i<n;i++) w[i] = 1; W_all = n; }
+
+    // Gewichtungs-Prüfung: Summe darf 100 % nicht überschreiten
+    var overW = W_all - 100 > 0.1; // Toleranz für Rundung (z. B. 3 × 33,33 %)
+    var wWarnEl = $('weightWarn');
+    var whint = t('wBase');
+    if(overW){
+      whint += tf('wOverShort', {x: fmtTrim(W_all,2)});
+      wWarnEl.style.display = '';
+      wWarnEl.textContent = tf('wOverLong', {x: fmtTrim(W_all,2), y: fmtTrim(W_all-100,2)});
+    } else {
+      wWarnEl.style.display = 'none';
+      if(W_all < 99.9){
+        whint += tf('wUnder', {x: fmtTrim(W_all,2)});
+      } else {
+        whint += tf('wOk', {x: isFinite(riskAmt) ? money(riskAmt) : '—'});
+      }
+    }
+    $('weightHint').innerHTML = whint;
+
+    // geometry + valid set
+    var geo = [], valid = [];
+    for(i=0;i<n;i++){
+      geo[i] = parseGeom(state.positions[i]);
+      if(!geo[i].empty && !geo[i].error) valid.push(i);
+    }
+
+    // solve total lot L over valid positions
+    var sumWV = 0;
+    valid.forEach(function(k){ sumWV += w[k]; });
+    var denom = 0;
+    valid.forEach(function(k){ denom += (w[k]/sumWV) * geo[k].slDist; });
+    var R_V = (isFinite(riskAmt) ? riskAmt : NaN) * (sumWV / W_all);
+    var L = (valid.length && isFinite(R_V) && isFinite(pointVal) && pointVal > 0 && denom > 0)
+      ? R_V / (pointVal * denom) : NaN;
+
+    var sumLot = 0, sumRisk = 0, sumProfit = 0, anyTP = false, active = 0;
+    var tpRowsData = [];
+
+    for(i=0;i<n;i++){
+      var card = cards[i]; if(!card) continue;
+      var p = state.positions[i], g = geo[i];
+      var q = function(sel){ return card.querySelector('[data-r=' + sel + ']'); };
+
+      q('share').innerHTML = t('share') + ': <b>' + fmtTrim(w[i]/W_all*100, 2) + ' %</b>';
+      card.querySelector('input[data-f=weight]').classList.toggle('bad', overW);
+
+      var dirEl = q('dir');
+      dirEl.className = 'badge' + (g.dir ? ' ' + g.dir : '');
+      dirEl.textContent = g.dir === 'long' ? 'Long' : g.dir === 'short' ? 'Short' : '—';
+
+      var warnEl = q('warn');
+      var clear = function(){
+        q('lot').textContent = '—'; q('lotExact').textContent = '';
+        q('risk').textContent = '—'; q('profit').textContent = '—';
+        q('slD').textContent = '—'; q('rrr').textContent = '—';
+        q('slInfo').textContent = '';
+      };
+
+      if(g.error){
+        clear();
+        warnEl.style.display = ''; warnEl.className = 'pos-warn'; warnEl.textContent = g.error;
+        continue;
+      }
+      if(g.empty || !isFinite(L)){
+        clear();
+        warnEl.style.display = 'none';
+        continue;
+      }
+
+      active++;
+      var lotExact = (w[i]/sumWV) * L;
+      var lot = floor2(lotExact);
+      var risk = lot * g.slDist * pointVal;
+      var profit = (isFinite(g.tpDist) && lot >= MIN_LOT) ? lot * g.tpDist * pointVal : NaN;
+      var rrr = isFinite(g.tpDist) && g.slDist > 0 ? g.tpDist / g.slDist : NaN;
+
+      if(lot < MIN_LOT){
+        clear();
+        q('slD').textContent = money(g.slDist);
+        warnEl.style.display = ''; warnEl.className = 'pos-warn';
+        warnEl.textContent = t('warnMinLot');
+        continue;
+      }
+
+      q('lot').textContent = fmt(lot);
+      q('lotExact').textContent = t('exact') + ' ' + fmt(lotExact, 4);
+      q('risk').textContent = '−' + money(risk);
+      q('profit').textContent = isFinite(profit) ? '+' + money(profit) : '—';
+      q('slD').textContent = money(g.slDist);
+      q('rrr').textContent = isFinite(rrr) ? '1 : ' + fmt(rrr, 2) : '—';
+      q('slInfo').innerHTML = p.mode === 'price'
+        ? t('slInfoSL') + ': <b>' + money(g.slDist) + '</b>' + (isFinite(g.tpDist) ? ' · ' + t('slInfoTP') + ': <b>' + money(g.tpDist) + '</b>' : '')
+        : (isFinite(g.tpDist) ? t('slInfoTP') + ': <b>' + money(g.tpDist) + '</b>' : '');
+
+      if(lotExact - lot > 0.0001){
+        warnEl.style.display = ''; warnEl.className = 'pos-warn amber';
+        warnEl.textContent = tf('warnRounded', {a: fmt(lotExact,4), b: fmt(lot), c: money(risk)});
+      } else {
+        warnEl.style.display = 'none';
+      }
+
+      sumLot += lot;
+      sumRisk += risk;
+      if(isFinite(profit)){ sumProfit += profit; anyTP = true; }
+      tpRowsData.push({ i:i, lot:lot, tp:g.tpDist, profit:profit });
+    }
+
+    // TP breakdown table
+    var tpTable = $('tpTable'), tpRows = $('tpRows');
+    if(tpRowsData.length > 1){
+      tpTable.style.display = '';
+      tpRows.innerHTML = tpRowsData.map(function(r){
+        var sharePct = sumLot > 0 ? r.lot/sumLot*100 : 0;
+        return '<div class="tp-row">' +
+          '<span class="n">Pos ' + String(r.i+1).padStart(2,'0') + '</span>' +
+          '<span class="bar"><i style="width:' + Math.min(100,sharePct) + '%"></i></span>' +
+          '<span class="r">' + fmt(r.lot) + ' ' + t('lotUnit') + '</span>' +
+          '<span class="r mut hide-m">' + fmtTrim(sharePct,1) + ' ' + t('shareUnit') + '</span>' +
+          '<span class="r g hide-m">' + (isFinite(r.profit) ? '+' + money(r.profit) : t('noTP')) + '</span>' +
+        '</div>';
+      }).join('');
+    } else {
+      tpTable.style.display = 'none';
+    }
+
+    // summary
+    var has = active > 0 && isFinite(riskAmt);
+    $('sumLots').textContent = has ? fmt(sumLot) : '—';
+    $('sumLotsSub').textContent = has ? tf('sumCalc', {a: active, n: n}) : '';
+    $('sumRisk').textContent = has ? '−' + money(sumRisk) : '—';
+    $('sumRiskSub').textContent = (has && isFinite(acct) && acct>0) ? tf('ofAcct', {x: fmt(sumRisk/acct*100,2)}) : '';
+    $('sumProfit').textContent = has && anyTP ? '+' + money(sumProfit) : '—';
+    $('sumProfitSub').textContent = (has && anyTP && isFinite(acct) && acct>0) ? tf('ofAcctTP', {x: fmt(sumProfit/acct*100,2)}) : t('enterTPs');
+    $('sumRRR').textContent = has && anyTP && sumRisk>0 ? '1 : ' + fmt(sumProfit/sumRisk,2) : '—';
+    $('acctAfter').textContent = (has && isFinite(acct)) ? money(acct - sumRisk) : '—';
+
+    var used = (has && isFinite(riskAmt) && riskAmt>0) ? Math.min(100, sumRisk/riskAmt*100) : 0;
+    $('riskFill').style.width = used + '%';
+    $('riskCapL').textContent = tf('budgetUsed', {x: has ? fmt(used,1) + ' %' : '—'});
+    $('riskCapR').textContent = has ? money(sumRisk) + ' / ' + money(riskAmt) : '';
+  }
+
+  // ---------- Vorlage: laden ----------
+  function loadPreset(){
+    try{
+      var el = document.getElementById('preset');
+      var cfg = el ? JSON.parse(el.textContent) : null;
+      if(!cfg || typeof cfg !== 'object') return;
+      if(cfg.lang === 'de' || cfg.lang === 'en') LANG = cfg.lang;
+      if(cfg.acct != null) acctEl.value = cfg.acct;
+      if(cfg.riskPct != null) riskPctEl.value = cfg.riskPct;
+      if(cfg.pointVal != null) pointValEl.value = cfg.pointVal;
+      if(Array.isArray(cfg.positions) && cfg.positions.length){
+        state.positions = cfg.positions.map(function(p){ return Object.assign(defaultPos(false), p); });
+        state.count = Math.max(1, Math.min(MAX_POS, cfg.count || cfg.positions.length));
+        $('posCountLbl').textContent = state.count;
+      }
+    }catch(e){ /* defekter Preset-Block -> Standardwerte verwenden */ }
+  }
+
+  // ---------- Vorlage: speichern ----------
+  $('saveTpl').addEventListener('click', function(){
+    var msg = $('saveMsg');
+    try{
+      var cfg = {
+        lang: LANG,
+        acct: acctEl.value,
+        riskPct: riskPctEl.value,
+        pointVal: pointValEl.value,
+        count: state.count,
+        positions: state.positions.slice(0, state.count)
+      };
+      var json = JSON.stringify(cfg).replace(/</g, '\\u003c');
+      var re = new RegExp('<script type="application/json" id="preset">[\\s\\S]*?</scr' + 'ipt>');
+      var html = PRISTINE.replace(re,
+        '<script type="application/json" id="preset">' + json + '</scr' + 'ipt>');
+      var blob = new Blob([html], {type: 'text/html'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = t('fileName');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+      msg.textContent = t('savedOk');
+    }catch(e){
+      msg.textContent = t('savedFail');
+    }
+    setTimeout(function(){ msg.textContent = ''; }, 5000);
+  });
+
+  // ---------- init ----------
+  document.getElementById('cpYear').textContent = new Date().getFullYear();
+  loadPreset();
+  applyLang();
+  renderCards();
+  syncRiskFromPct();
+  recalc();
+})();
+</script>
+</body>
+</html>
